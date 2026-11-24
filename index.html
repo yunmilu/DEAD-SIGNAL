@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEAD SIGNAL — 추리 수사 게임</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ===== TITLE ===== -->
+    <section id="screen-title" class="screen active">
+      <div class="noise"></div>
+      <div class="title-wrap">
+        <div class="signal-badge">● REC &nbsp;·&nbsp; 해담시 경찰청 강력반</div>
+        <h1 class="game-title" data-text="DEAD SIGNAL">DEAD SIGNAL</h1>
+        <p class="subtitle">죽은 자의 신호는 끊기지 않는다</p>
+        <div class="title-menu">
+          <button class="btn primary" data-action="new-game">수사 시작</button>
+          <button class="btn" data-action="continue">이어서 수사</button>
+          <button class="btn ghost" data-action="howto">조작 안내</button>
+        </div>
+        <p class="hint">클릭 또는 엔터로 진행 · 이어폰 착용 권장</p>
+      </div>
+      <button id="sound-toggle" class="sound-btn" title="사운드 켜기/끄기">🔊</button>
+    </section>
+
+    <!-- ===== NARRATIVE (chapters) ===== -->
+    <section id="screen-story" class="screen">
+      <div class="story-bg" id="story-bg"></div>
+      <div class="scanline"></div>
+      <div class="story-box">
+        <div class="story-head">
+          <span id="story-chapter" class="chapter-tag">CHAPTER</span>
+          <span id="story-step" class="step-tag"></span>
+        </div>
+        <div id="story-text" class="story-text"></div>
+        <div class="story-foot">
+          <div class="story-foot-left">
+            <span class="mini-hint">클릭 또는 엔터로 계속</span>
+            <button class="btn tiny exit" data-action="open-exit">🚪 나가기</button>
+          </div>
+          <button class="btn small" data-action="story-next">계속 ▶</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== INVESTIGATION MAP ===== -->
+    <section id="screen-map" class="screen">
+      <header class="hud">
+        <div class="hud-left">
+          <span class="hud-title">수사 지도 · 해담시</span>
+          <span class="hud-sub" id="map-progress">단서 0 / 18</span>
+          <div class="signal-meter"><span>신호</span><div class="sig-bar"><i id="signal-fill"></i></div><span id="signal-pct">0%</span></div>
+        </div>
+        <div class="hud-right">
+          <button class="btn tiny" data-action="go-board">📋 증거 보드</button>
+          <button class="btn tiny" data-action="go-interrogate">🎤 심문</button>
+          <button class="btn tiny" data-action="go-quiz">🧠 추리</button>
+          <button class="btn tiny" data-action="open-dossier">👥 인물</button>
+          <button class="btn tiny ghost" data-action="to-title">⏻</button>
+          <button class="btn tiny exit" data-action="open-exit">🚪 나가기</button>
+        </div>
+      </header>
+      <div class="map-area">
+        <svg class="map-grid" preserveAspectRatio="none" viewBox="0 0 100 100">
+          <defs>
+            <pattern id="grid" width="5" height="5" patternUnits="userSpaceOnUse">
+              <path d="M5 0 L0 0 0 5" fill="none" stroke="#1d2b3a" stroke-width="0.15"/>
+            </pattern>
+          </defs>
+          <rect width="100" height="100" fill="url(#grid)" />
+          <path d="M0 70 Q 25 62 50 72 T 100 66" fill="none" stroke="#123047" stroke-width="3" opacity="0.7"/>
+          <path d="M0 76 Q 25 68 50 78 T 100 72" fill="none" stroke="#0f2738" stroke-width="2" opacity="0.6"/>
+        </svg>
+        <div class="map-coast">~ 해 담 만 ~</div>
+        <div id="map-locations"></div>
+      </div>
+      <aside class="case-file" id="case-file">
+        <div class="case-file-head">CASE FILE #DS-0617</div>
+        <div class="case-file-body"><p>장소를 선택해 단서를 수집하십시오.</p></div>
+      </aside>
+    </section>
+
+    <!-- ===== LOCATION / CLUE COLLECTION ===== -->
+    <section id="screen-location" class="screen">
+      <header class="hud">
+        <button class="btn tiny" data-action="go-map">◀ 지도로</button>
+        <span class="hud-title" id="loc-name">장소</span>
+        <span class="hud-sub" id="loc-count">0 / 0</span>
+        <button class="btn tiny exit" data-action="open-exit">🚪 나가기</button>
+      </header>
+      <div class="location-scene" id="location-scene">
+        <div class="loc-atmosphere" id="loc-atmosphere"></div>
+        <p class="loc-desc" id="loc-desc"></p>
+        <div id="clue-list" class="clue-list"></div>
+      </div>
+    </section>
+
+    <!-- ===== EVIDENCE BOARD ===== -->
+    <section id="screen-board" class="screen">
+      <header class="hud">
+        <button class="btn tiny" data-action="go-map">◀ 지도로</button>
+        <span class="hud-title">증거 보드 · 단서 연결 및 조합</span>
+        <span class="hud-sub" id="board-count">단서 0 · 결론 0</span>
+        <button class="btn tiny exit" data-action="open-exit">🚪 나가기</button>
+      </header>
+      <div class="board-toolbar">
+        <button class="btn small active" data-action="board-mode-link">🔗 연결 모드</button>
+        <button class="btn small" data-action="board-mode-combine">🧪 조합 모드</button>
+        <span class="board-status" id="board-status">카드 두 개를 클릭해 연결하세요.</span>
+      </div>
+      <div class="board-canvas" id="board-canvas">
+        <svg id="board-lines"></svg>
+        <div id="board-cards"></div>
+      </div>
+      <div class="board-foot">
+        <span id="combine-result" class="combine-result"></span>
+        <button class="btn small primary" data-action="do-combine" id="combine-btn" style="display:none">조합 실행 ➜</button>
+      </div>
+    </section>
+
+    <!-- ===== INTERROGATION ===== -->
+    <section id="screen-interrogate" class="screen">
+      <header class="hud">
+        <button class="btn tiny" data-action="go-map">◀ 지도로</button>
+        <span class="hud-title">심문실 · 증거 제시형</span>
+        <span class="hud-sub">용의자를 선택하세요</span>
+        <button class="btn tiny exit" data-action="open-exit">🚪 나가기</button>
+      </header>
+      <div class="interrogate-layout">
+        <div class="suspect-list" id="suspect-list"></div>
+        <div class="interrogate-room">
+          <div id="interrogate-dialog" class="dialog-box">
+            <div class="dialog-name">심문 대기 중</div>
+            <div class="dialog-text">왼쪽에서 심문 대상을 선택하세요. 한태린 경장은 공감 없는 뼈 때리는 말투로 밀어붙입니다.</div>
+          </div>
+          <div class="present-bar">
+            <span>증거 제시:</span>
+            <div id="present-evidence" class="present-evidence"></div>
+          </div>
+          <div id="interrogate-log" class="interrogate-log"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== QUIZ ===== -->
+    <section id="screen-quiz" class="screen">
+      <header class="hud">
+        <button class="btn tiny" data-action="go-map">◀ 지도로</button>
+        <span class="hud-title">최종 추리 · 플레이어가 직접 판단</span>
+        <span class="hud-sub" id="quiz-progress">0 / 4</span>
+        <button class="btn tiny exit" data-action="open-exit">🚪 나가기</button>
+      </header>
+      <div class="quiz-area" id="quiz-area"></div>
+    </section>
+
+    <!-- ===== ENDING ===== -->
+    <section id="screen-ending" class="screen">
+      <div class="noise"></div>
+      <div class="ending-wrap">
+        <div class="ending-tag">CASE CLOSED · 단일 엔딩</div>
+        <h1 class="ending-title">DEAD SIGNAL</h1>
+        <div id="ending-text" class="ending-text"></div>
+        <div class="ending-btns">
+          <button class="btn primary" data-action="to-title">처음으로 돌아가기</button>
+          <button class="btn exit" data-action="open-exit">🚪 나가기</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== EXIT ===== -->
+    <section id="screen-exit" class="screen">
+      <div class="noise"></div>
+      <div class="exit-wrap">
+        <div class="exit-badge">● CONNECTION LOST</div>
+        <h1>수사 종료</h1>
+        <p id="exit-msg"></p>
+        <div class="exit-btns">
+          <button class="btn primary" data-action="exit-to-title">타이틀로 돌아가기</button>
+          <button class="btn" data-action="close-window">창 닫기</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== HOW TO MODAL ===== -->
+    <div id="modal-howto" class="modal">
+      <div class="modal-box">
+        <h2>조작 안내</h2>
+        <ul>
+          <li><b>대화</b>는 클릭 또는 엔터로 진행됩니다. 나머지는 마우스 클릭으로 조작하세요.</li>
+          <li><b>지도</b>에서 장소를 클릭해 단서를 수집하세요.</li>
+          <li><b>증거 보드</b>에서 카드 두 개를 클릭해 연결하고, 조합 모드로 새 결론을 만드세요.</li>
+          <li><b>심문</b>에서 용의자를 고른 뒤 증거를 제시하면 진술이 바뀝니다.</li>
+          <li><b>추리</b>에서 직접 범인을 지목하세요. 진행 상황에 따라 BGM이 바뀝니다.</li>
+        </ul>
+        <button class="btn primary" data-action="close-howto">확인</button>
+      </div>
+    </div>
+
+    <!-- ===== EXIT MODAL ===== -->
+    <div id="modal-exit" class="modal">
+      <div class="modal-box">
+        <h2>수사를 종료할까요?</h2>
+        <p class="exit-modal-desc">진행 상황을 저장하고 나갈 수 있습니다.</p>
+        <div class="exit-modal-btns">
+          <button class="btn primary" data-action="exit-save">저장하고 나가기</button>
+          <button class="btn" data-action="exit-nosave">저장 없이 나가기</button>
+          <button class="btn ghost" data-action="exit-cancel">취소</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DOSSIER MODAL ===== -->
+    <div id="modal-dossier" class="modal">
+      <div class="modal-box dossier-box">
+        <h2>수사 인물 파일</h2>
+        <div id="dossier-content"></div>
+        <button class="btn primary" data-action="close-dossier">닫기</button>
+      </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
