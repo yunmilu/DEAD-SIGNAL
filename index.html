@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DEAD SIGNAL — 추리 수사 게임</title>
-  <!-- 브라우저 탭 아이콘(파비콘) -->
   <link rel="icon" type="image/png" href="./icon-192.png" />
   <style>
 :root{
@@ -57,14 +56,8 @@ body{
 #screen-title{align-items:center;justify-content:center;
   background:radial-gradient(ellipse at 50% 40%,#10202f 0%,#070b12 70%)}
 .title-wrap{text-align:center;z-index:2;position:relative}
-.game-logo{
-  width:88px;height:88px;object-fit:cover;border-radius:16px;
-  margin:0 auto 16px;display:block;
-  border:1px solid var(--line2);
-  box-shadow:0 0 24px rgba(76,201,240,.22);
-}
 .signal-badge{display:inline-block;border:1px solid var(--red);color:var(--red);
-  padding:5px 14px;font-size:11px;letter-spacing:.15em;margin-bottom:20px;animation:blink 2.4s infinite}
+  padding:5px 14px;font-size:11px;letter-spacing:.15em;margin-bottom:28px;animation:blink 2.4s infinite}
 @keyframes blink{0%,92%{opacity:1}95%{opacity:.25}100%{opacity:1}}
 .game-title{font-size:clamp(48px,9vw,110px);letter-spacing:.12em;font-weight:900;
   color:var(--txt);text-shadow:0 0 30px rgba(76,201,240,.25);position:relative;line-height:1}
@@ -260,8 +253,6 @@ body{
     <section id="screen-title" class="screen active">
       <div class="noise"></div>
       <div class="title-wrap">
-        <!-- 타이틀 로고 이미지 (파일명/확장자가 다르면 src 값만 수정하세요) -->
-        <img src="./icon-192.png" alt="DEAD SIGNAL 로고" class="game-logo" />
         <div class="signal-badge">● REC &nbsp;·&nbsp; 해담시 경찰청 강력반</div>
         <h1 class="game-title" data-text="DEAD SIGNAL">DEAD SIGNAL</h1>
         <p class="subtitle">죽은 자의 신호는 끊기지 않는다</p>
@@ -591,10 +582,913 @@ const CHAPTERS = {
       { who: "시스템", text: "단서를 조합한 결과, 새로운 사실이 드러났습니다.", type: "sys" },
       { who: "한태린", text: "물이 원인이 아니야. 약이야. 마약 때문에 물이 무서워진 거야.", type: "tarin" },
       { who: "한태린", text: "갈증에 시달리다 물가로 갔고... 신부전이든 열사병이든, 겉으론 탈수로 보이게 만든 거야.", type: "tarin" },
-      { who: "한태린", text: "오빠가 그걸 알아챘어. 그래서 죽었어.", type: "tarin" }
+      { who: "한태린", text: "오빠가 그걸 알아챘어. 그래서 죽었어.", type: "tarin" },
+      { who: "시스템", text: "조직과 범인을 특정해야 합니다. 증거 보드에서 단서를 연결하세요.", type: "sys" }
+    ]
+  },
+  act4: {
+    id: "act4", label: "제 4장 · 심문", bgm: "interrogate",
+    lines: [
+      { who: "시스템", text: "관계자를 심문합니다. 증거를 제시해 진술을 끌어내세요.", type: "sys" },
+      { who: "한태린", text: "공감은 하지 마. 뼈를 때리는 말만 하자.", type: "tarin" }
+    ]
+  },
+  act5: {
+    id: "act5", label: "제 5장 · 최종 추리", bgm: "reveal",
+    lines: [
+      { who: "시스템", text: "모든 단서가 모였습니다. 이제 직접 범인을 추리하세요.", type: "sys" },
+      { who: "한태린", text: "마지막 퍼즐이야. 오빠가 보던 그 시선으로 직접 결론을 내리자.", type: "tarin" }
+    ]
+  },
+  ending: {
+    id: "ending", label: "엔딩 · DEAD SIGNAL", bgm: "ending",
+    lines: [
+      { who: "시스템", text: "사건 해결 — 단일 엔딩", type: "sys" },
+      { who: "한태린", text: "류지태. 잡았다.", type: "tarin" },
+      { who: "한태린", text: "189cm, 285mm, 쉐도우 펌. 디스크 수술 자국까지. 오빠가 마지막으로 움켜쥔 명함이 전부를 말해줬어.", type: "tarin" },
+      { who: "시스템", text: "그가 속한 조직 '녹티스'는 다크웹에서만 활동했다. 신종 마약을 개발해 사람을 실험대에 올렸고, 공장은 남태평양 벨모라 섬에 숨겨져 있었다.", type: "sys" },
+      { who: "시스템", text: "마피아와 야쿠자 다음가는 최대 규모의 조직이었다. 하지만 조직원에 대해 밝혀진 것은 지금까지 단 하나도 없었다.", type: "sys" },
+      { who: "한태린", text: "오빠. 신호는 끊기지 않았어. 내가 받았어. ...이제 쉬어도 돼.", type: "tarin" },
+      { who: "시스템", text: "DEAD SIGNAL — 사건 종결.", type: "sys" }
     ]
   }
 };
+
+const LOCATIONS = {
+  beach: { id: "beach", name: "해담 해변", icon: "🌊", x: 18, y: 62, desc: "6명의 시신이 발견된 물가. 파도 소리와 함께 이상한 공포가 남아 있다.", clueIds: ["c_water", "c_thirst", "c_fear", "c_powder"] },
+  lab: { id: "lab", name: "국과수", icon: "🔬", x: 46, y: 28, desc: "부검과 독성 검사가 이루어지는 국립과학수사연구원.", clueIds: ["c_autopsy", "c_toxic", "c_memo"] },
+  harbor: { id: "harbor", name: "해담 항구", icon: "🚢", x: 74, y: 58, desc: "수상한 화물이 새벽에 하역되었다는 제보가 있는 항구.", clueIds: ["c_cctv", "c_witness", "c_manifest"] },
+  motel: { id: "motel", name: "폐모텔", icon: "🏚️", x: 52, y: 70, desc: "한태건 경감이 살해당한 현장. 아직 현장 보존 중이다.", clueIds: ["c_motel", "c_footprint", "c_hair", "c_medal", "c_stream"] },
+  station: { id: "station", name: "경찰청 강력반", icon: "🚨", x: 30, y: 26, desc: "태린과 태건이 근무한 강력반 사무실. 오빠의 책상이 그대로 남아 있다.", clueIds: ["c_profile", "c_noctis", "c_disc"] }
+};
+
+const CLUES = {
+  c_water: { id: "c_water", title: "물가의 시신", icon: "🩴", loc: "beach", desc: "6개월간 6명이 물가 근처에서 발견됐다. 모두 해담시 연안과 하천 인근이다.", tag: "현장" },
+  c_thirst: { id: "c_thirst", title: "극심한 갈증", icon: "🥤", loc: "beach", desc: "시신 주변에 물병이 있었고, 손은 물을 향해 뻗어 있었다. 분명 목이 말랐을 것이다.", tag: "현장" },
+  c_fear: { id: "c_fear", title: "물에 대한 공포", icon: "😱", loc: "beach", desc: "목격자 진술: \"물만 보면 정신없이 도망쳤어요. 원래 물을 무서워하던 사람은 아니었는데...\"", tag: "진술" },
+  c_powder: { id: "c_powder", title: "손톱 속 흰 분말", icon: "💊", loc: "beach", desc: "피해자 손톱에서 미확인 흰색 분말이 검출됐다. 국과수도 정체를 밝히지 못했다.", tag: "물리" },
+  c_autopsy: { id: "c_autopsy", title: "부검 보고서", icon: "📋", loc: "lab", desc: "6명 중 3명은 급성 신부전, 3명은 열사병. 표면적 사인은 모두 '탈수'로 기재됐다.", tag: "감정" },
+  c_toxic: { id: "c_toxic", title: "독성 검사 결과", icon: "🧪", loc: "lab", desc: "모든 시신에서 동일한 미지의 화합물이 검출됐다. 알려진 마약류와 구조가 유사하지만 신종 물질이다.", tag: "감정" },
+  c_memo: { id: "c_memo", title: "한태건의 메모", icon: "✍️", loc: "lab", desc: "오빠의 손글씨. 맨 아래에 '태린아, 미안하다'가 적혀 있다. \"물이 아니다. 약이다. 물을 무서워하게 만든다. W는 웹(Web)이다. 다크웹에서 찾아라.\"", tag: "메모" },
+  c_cctv: { id: "c_cctv", title: "항구 CCTV", icon: "📷", loc: "harbor", desc: "새벽 3시, 검은 차에서 키가 큰 남성이 내려 검은 통을 하역한다. 화질이 흐려 얼굴 식별은 안 된다.", tag: "영상" },
+  c_witness: { id: "c_witness", title: "항구 노동자 진술", icon: "🗣️", loc: "harbor", desc: "\"곰처럼 생긴 분이었어요. 머리는 짧게 밀었고, 아주 깔끔했죠. 권투 장갑도 끼고 있더라고요.\"", tag: "진술" },
+  c_manifest: { id: "c_manifest", title: "선적 명세서", icon: "📦", loc: "harbor", desc: "통의 행선지는 '남태평양 벨모라 섬'. 취급자란에는 'R'로 끝나는 서명이 적혀 있다.", tag: "서류" },
+  c_motel: { id: "c_motel", title: "현장 상황", icon: "🩸", loc: "motel", desc: "한태건 경감이 쓰러져 있었다. 오른 주먹에 피가 묻어 있었다. 마지막까지 저항한 흔적이었다.", tag: "현장" },
+  c_footprint: { id: "c_footprint", title: "큰 발자국", icon: "👣", loc: "motel", desc: "현장에 남은 범인의 발자국. 오빠보다 훨씬 크다. 정확한 사이즈 측정 필요.", tag: "물리" },
+  c_hair: { id: "c_hair", title: "짧은 머리카락", icon: "💇", loc: "motel", desc: "오빠가 쥐고 있던 머리카락. 짧게 깎은 형태. 오빠의 포마드 머리와는 다르다.", tag: "물리" },
+  c_medal: { id: "c_medal", title: "복싱장 명함", icon: "🥊", loc: "motel", desc: "오빠가 현장에서 움켜쥐고 있던 명함. '해담 복싱클럽'. 회원란에는 이니셜만 적혀 있다.", tag: "메모" },
+  c_stream: { id: "c_stream", title: "라이브 방송 영상", icon: "📹", loc: "motel", desc: "폐가 탐험 유튜버가 현장에서 찍은 영상. 화면 가장자리에 큰 체격의 남성이 잠깐 스친다. 채팅창엔 '저 사람 누구냐'가 쏟아졌다.", tag: "영상" },
+  c_profile: { id: "c_profile", title: "오빠의 용의자 메모", icon: "🗂️", loc: "station", desc: "오빠가 수사하며 적어둔 인상착의. '곰상, 큰 체격, 짧은 머리. 복싱을 즐기는 남자. 세심하고 깔끔한 태도.' 이름은 적혀 있지 않다.", tag: "기록" },
+  c_noctis: { id: "c_noctis", title: "조직 '녹티스' 정보", icon: "🕸️", loc: "station", desc: "오빠가 끝까지 쫓던 다크웹 조직. 활동은 다크웹에서만 이루어지고, 정체는 거의 밝혀지지 않았다. 조직원에 대한 정보도 전무하다.", tag: "기록" },
+  c_disc: { id: "c_disc", title: "의료기록 사본", icon: "🏥", loc: "station", desc: "오빠가 몰래 뽑아둔 기록. '이니셜 R — 요추 디스크 수술 2회'. 오빠는 이 남자를 특정하고 있었다.", tag: "서류" }
+};
+
+const COMBINATIONS = [
+  { id: "e_drug", a: "c_powder", b: "c_toxic", icon: "☠️", title: "신종 마약 확인", desc: "손톱의 분말과 혈액의 화합물이 동일 물질. 신종 마약이 확인됐다.", unlockChapter: "act3" },
+  { id: "e_hydro", a: "c_fear", b: "e_drug", icon: "💧", title: "물공포증 유발 마약", desc: "마약이 물에 대한 극심한 공포를 유발했다. 갈증에 물가로 간 피해자들이 그대로 사망했다.", unlockChapter: null },
+  { id: "e_suspect", a: "c_footprint", b: "c_hair", icon: "🎯", title: "범인의 인상 특성", desc: "현장의 큰 발자국과 짧은 머리카락. 범인은 키가 크고 특정 헤어스타일을 한 남자다.", unlockChapter: null },
+  { id: "e_identity", a: "e_suspect", b: "c_profile", icon: "🪪", title: "용의자 특정", desc: "현장 인상과 오빠의 메모가 일치한다. 범인은 오빠가 주시하던 그 남자다. 이니셜 R.", unlockChapter: null },
+  { id: "e_belmora", a: "c_cctv", b: "c_manifest", icon: "🏝️", title: "벨모라 섬 연결", desc: "CCTV의 남성과 벨모라 섬행 화물. 마약 공장은 남태평양 벨모라 섬에 있다.", unlockChapter: null },
+  { id: "e_culprit", a: "e_identity", b: "c_noctis", icon: "🔒", title: "범인과 조직 연결", desc: "이니셜 R의 남자가 다크웹 조직 '녹티스'와 연결된다. 연쇄 살인의 실행자일 가능성이 높다.", unlockChapter: null },
+  { id: "e_stream", a: "c_stream", b: "c_cctv", icon: "🎬", title: "현장과 항구의 같은 남자", desc: "현장 영상에 스친 남성과 항구 CCTV의 남성은 동일 인물이었다. 큰 체격과 검은 차가 일치한다.", unlockChapter: null },
+  { id: "e_confess", a: "e_culprit", b: "c_memo", icon: "📖", title: "오빠가 남긴 마지막 단서", desc: "오빠의 메모 'W는 웹이다'는 다크웹을 가리켰다. 그 조직이 녹티스라는 것까지 확인했다. 이제 심문만 남았다.", unlockChapter: "act5" }
+];
+
+const CONNECTIONS = [
+  { a: "c_water", b: "c_thirst" },
+  { a: "c_fear", b: "e_hydro" },
+  { a: "c_autopsy", b: "e_drug" },
+  { a: "c_memo", b: "e_confess" },
+  { a: "c_footprint", b: "e_suspect" },
+  { a: "e_identity", b: "c_disc" },
+  { a: "e_belmora", b: "c_noctis" },
+  { a: "e_culprit", b: "c_medal" },
+  { a: "c_stream", b: "e_stream" },
+  { a: "c_stream", b: "c_motel" }
+];
+
+const SUSPECTS = {
+  park: {
+    id: "park", name: "박민수", role: "항구 노동자 · 목격자", icon: "👷",
+    intro: "저... 저는 그냥 일만 하는 사람입니다. 새벽에 뭐 본 거 없어요.",
+    reactions: {
+      wrong: "그건 저랑 상관없는 얘기네요. 경장님, 다른 데 알아보시는 게...",
+      topics: [
+        { need: "c_cctv", say: "아... 그 영상 보셨군요. 그 사람, 정말 곰처럼 생겼어요. 키가 정말 컸어요." },
+        { need: "c_witness", say: "맞아요, 권투 장갑 끼고 있더라고요. 머리는 짧게 밀었고, 아주 깔끔했어요. 통을 내리면서 장갑을 꼭 쥐더군요." },
+        { need: "c_manifest", say: "그 통... 벨모라 섬으로 간다고 들었어요. 서명은 늘 'R'로 끝났고요. 더 이상은 못 하겠어요!" }
+      ]
+    }
+  },
+  kim: {
+    id: "kim", name: "김서연", role: "국과수 검시관", icon: "👩‍⚕️",
+    intro: "경장님, 결과는 이미 보고서로 다 드렸는데요.",
+    reactions: {
+      wrong: "그건 제 소관이 아닌 것 같은데요? 부검 관련이면 말씀하세요.",
+      topics: [
+        { need: "c_autopsy", say: "급성 신부전과 열사병... 겉보기엔 탈수입니다. 그런데 갈증으로 물을 마셨다면 신부전이 올 리가 없죠. 뭔가 이상했어요." },
+        { need: "c_toxic", say: "바로 그겁니다. 미지의 화합물이 전원에게서 나왔어요. 신종 마약이에요. 일반 검사엔 안 잡힙니다." },
+        { need: "e_hydro", say: "물공포증... 맞아요. 약이 뇌의 갈증 중추와 공포 중추를 뒤집었을 겁니다. 물이 무서워진 피해자가 갈증으로 쓰러진 거죠. 태건 경감님도 이걸 알아채셨어요." }
+      ]
+    }
+  },
+  lee: {
+    id: "lee", name: "이정호", role: "폐모텔 주인 · 현장 목격자", icon: "🧔",
+    intro: "그날 밤 손님이랑 시비가 났다는데... 전 아무것도 못 봤어요.",
+    reactions: {
+      wrong: "그런 건 잘 모르겠네요. 모텔 운영만 하는 사람입니다.",
+      topics: [
+        { need: "c_footprint", say: "그 사람 신발... 진짜 컸어요. 곰처럼 생긴 사람이었고, 복싱을 한다고 했던 기억이 나네요." },
+        { need: "c_hair", say: "머리 짧게 밀었죠. 경감님은 포마드였는데, 그 사람은 달랐어요." },
+        { need: "c_disc", say: "허리가 안 좋다고 했어요. 디스크 수술을 받았대서, 제가... 아, 허리 조심하라고 했던 기억이 납니다. 이니셜이 R이었어요." }
+      ]
+    }
+  },
+  ryu: {
+    id: "ryu", name: "용의자 R", role: "용의자 · 신원 미상", icon: "🥊",
+    intro: "경장님, 저는 아무 잘못도 없습니다. 증거라고 내밀 게 있으시면 보여주시죠.",
+    reactions: {
+      wrong: "그런 것으로 저를 의심하시나요? 경감님의 죽음은 안타깝지만, 저는 그날 아무것도 안 했습니다.",
+      locked: "증거가 부족하군요. 태건 경감님도 그랬는데... 끝내 증명 못 하셨잖아요.",
+      topics: [
+        { need: "e_identity", say: "(눈꺼풀이 떨린다) 그 인상착의가... 저와 비슷하군요. 그렇다고 범인이라는 뜻은 아닙니다." },
+        { need: "e_belmora", say: "벨모라 섬? 처음 듣는 이름입니다. 무슨 소리하시는지...", shake: true },
+        { need: "e_culprit", say: "녹티스... 그 이름을 어떻게 알았죠. 태건 경감님이 알아낸 겁니까. ...아니, 태린 경장님이 직접 푸셨군요.", shake: true },
+        { need: "e_confess", say: "(주먹을 움켜쥐며 복싱 자세를 취한다) ...좋습니다. 깔끔하게 끝내죠. 제 이름은 류지태. 태건 경감님은 약을 막으려다 가셨고, 저는 그 약을 만들었습니다. 물이 무서워지는 약을. 6명이 그렇게 갔고, 경감님도 제 손에 죽었습니다. (체포)", final: true }
+      ]
+    }
+  }
+};
+
+const QUIZ = [
+  {
+    q: "6명의 사망 원인은 무엇이었습니까?", need: "e_hydro",
+    options: [
+      { text: "단순 탈수와 열사병", correct: false, fb: "표면적 사인일 뿐입니다. 독성 검사를 다시 보세요." },
+      { text: "신종 마약이 유발한 물공포증", correct: true, fb: "정답입니다. 마약이 공포 중추를 자극해 물을 무서워하게 만들었습니다." },
+      { text: "익사", correct: false, fb: "물가에서 발견됐지만, 폐에는 물이 거의 없었습니다." },
+      { text: "신체 폭행", correct: false, fb: "외상은 없었습니다." }
+    ]
+  },
+  {
+    q: "범인의 특징으로 옳은 것은?", need: "e_identity",
+    options: [
+      { text: "포마드 · 늑대상 (오빠와 같음)", correct: false, fb: "그건 한태건 경감의 특징입니다." },
+      { text: "올빽 · 여우상 (플레이어와 같음)", correct: false, fb: "그건 한태린 경장 본인입니다." },
+      { text: "곰상 · 짧은 머리 · 복싱 · 이니셜 R", correct: true, fb: "정답입니다. 현장 인상과 오빠의 메모가 일치했습니다." },
+      { text: "스킨헤드 · 쥐상", correct: false, fb: "현장에 그런 흔적은 없습니다." }
+    ]
+  },
+  {
+    q: "마약 공장이 숨겨진 장소는?", need: "e_belmora",
+    options: [
+      { text: "해담시 항구 창고", correct: false, fb: "항구는 경유지일 뿐입니다. 선적 명세서를 보세요." },
+      { text: "남태평양 벨모라 섬", correct: true, fb: "정답입니다. 녹티스의 공장은 벨모라 섬에 있습니다." },
+      { text: "폐모텔 지하", correct: false, fb: "그곳은 오빠가 살해당한 현장입니다." },
+      { text: "국과수 실험실", correct: false, fb: "국과수는 수사 기관입니다." }
+    ]
+  },
+  {
+    q: "이 사건의 범인은 누구입니까?", need: "e_culprit",
+    options: [
+      { text: "박민수 (항구 노동자)", correct: false, fb: "그는 목격자일 뿐입니다." },
+      { text: "이정호 (폐모텔 주인)", correct: false, fb: "그는 진술자일 뿐입니다." },
+      { text: "이니셜 R · 녹티스 소속 남자", correct: true, fb: "정답입니다. 자백으로 정체가 밝혀졌습니다." },
+      { text: "김서연 (검시관)", correct: false, fb: "그녀는 오빠를 도우려 했습니다." }
+    ]
+  }
+];
+
+const BGM_MOODS = {
+  title: { notes: [110, 146.83, 164.81, 220], tempo: 0.9, wave: "sine", gain: 0.05, filter: 700 },
+  tense: { notes: [98, 138.59, 155.56, 196], tempo: 1, wave: "triangle", gain: 0.055, filter: 600 },
+  investigate: { notes: [123.47, 164.81, 196, 246.94], tempo: 1.2, wave: "sine", gain: 0.045, filter: 900 },
+  motel: { notes: [87.31, 116.54, 146.83, 174.61], tempo: 0.75, wave: "sawtooth", gain: 0.035, filter: 450 },
+  reveal: { notes: [146.83, 196, 233.08, 293.66], tempo: 1.1, wave: "triangle", gain: 0.05, filter: 1100 },
+  interrogate: { notes: [110, 130.81, 164.81, 220], tempo: 0.6, wave: "square", gain: 0.028, filter: 500 },
+  ending: { notes: [130.81, 174.61, 220, 261.63], tempo: 1.4, wave: "sine", gain: 0.05, filter: 1200 }
+};
+
+const TARIN_QUIPS = [
+  "증거도 없이 말이야? 오빠한테 배운 건 다 까먹었나.",
+  "그 말, 증거로 바꿔올 수 있어? 못 하면 조용히 해.",
+  "공감은 안 해. 증거만 한다.",
+  "거짓말은 잘하네. 발자국은 못 속이더라.",
+  "그 소리 녹음됐어. 변호사한테 하든가.",
+  "오빠는 이럴 때 주먹을 쥐었어. 난 손톱을 물어뜯는 중이고."
+];
+
+const DOSSIER = [
+  {
+    name: "한태건", tag: "피해자 · 오빠 · 경감", icon: "🐺", color: "#4cc9f0",
+    rows: [
+      ["나이 / 직급", "38세 · 경감 (해담시 경찰청 강력반 12년차)"],
+      ["성격", "태린에게는 \"태린아\"라고 부르며 한없이 다정하다. 수사할 때는 예민하고 날카롭다."],
+      ["심문 말투", "피해자에게는 깊이 공감하지만, 피의자에게는 매섭게 몰아붙인다"],
+      ["외모 / 체형", "늑대상 · 192cm / 87kg · 탄탄한 근육 · 발 280mm · 포마드"],
+      ["특징", "스트레스 받으면 주먹을 움켜쥠. 미제사건 해결 1위, 전국 실적 1위. 언론에 이름이 오름."],
+      ["최후", "위장 수사 중 폐모텔에서 범인에게 살해당함."]
+    ]
+  },
+  {
+    name: "한태린", tag: "플레이어 · 경장", icon: "🦊", color: "#e63946",
+    rows: [
+      ["나이 / 직급", "32세 · 경장 (해담시 경찰청 강력반 2년차, 오빠와 같은 부서)"],
+      ["성격 / 말투", "공감보다 뼈 때리는 말을 먼저 던진다. 피의자에게 공감은 없다."],
+      ["외모 / 체형", "여우상 · 170cm / 62kg · 발 250mm · 주로 올빽머리"],
+      ["특징", "스트레스 받으면 손톱을 물어뜯음. 오빠를 닮아 사건을 빠르게 해결."],
+      ["계기", "신고 전화를 받고 출동했다가 오빠의 사망을 알게 됨. 만류에도 수사에 뛰어듦."]
+    ]
+  },
+  {
+    name: "용의자 R", tag: "용의자 · 신원 확인 중", icon: "🐻", color: "#e9c46a",
+    rows: [
+      ["나이 / 직업", "추정 30대 · 직업 확인 중"],
+      ["성향", "깔끔하고 세심함. 목격자들이 입을 모아 말한다."],
+      ["취미 / 전적", "복싱 · 요추 디스크 수술 전적"],
+      ["외모 / 체형", "곰상 · 큰 체격 · 짧은 머리"],
+      ["몽타주", "미작성 — 현장에서 인상이 뽑히지 않음."]
+    ],
+    hiddenTag: "범인 · 녹티스 소속",
+    hiddenRows: [
+      ["정체", "류지태. 다크웹 전용 조직 '녹티스'의 일원. 마피아, 야쿠자 다음가는 최대 규모."],
+      ["공장 위치", "남태평양 벨모라 섬 — 신종 마약 생산·실험 기지."]
+    ]
+  }
+];
+
+const ALL_IDS = { ...CLUES };
+COMBINATIONS.forEach(c => { ALL_IDS[c.id] = { id: c.id, title: c.title, icon: c.icon, desc: c.desc, tag: "결론" }; });
+
+/* ============================================================
+   DEAD SIGNAL · GAME ENGINE
+   ============================================================ */
+const SAVE_KEY = "dead_signal_save_v1";
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+const ProfanityFilter = (() => {
+  const rules = [
+    { re: /ㅅㅂ|싸발|씨발|시발|씨빨|시빨|개씨발/gi, to: "헐" },
+    { re: /개새끼야|개새끼|새끼야|새끼/gi, to: "사람" },
+    { re: /병신|찐따|저능아|돌아이/gi, to: "어리석은 사람" },
+    { re: /개좆|존나|좆나|졸라|좆/gi, to: "매우" },
+    { re: /미친\s*놈|미친놈|미친\s*년|미친년/gi, to: "정신이 이상한 사람" },
+    { re: /개놈|개년/gi, to: "저 사람" },
+    { re: /이\s*자식|그\s*자식/gi, to: "이 사람" },
+    { re: /닥쳐|꺼져|죽어라/gi, to: "조용히 해" },
+    { re: /fuck|shit|damn|bitch|asshole/gi, to: "..." }
+  ];
+  function clean(text) {
+    let s = String(text == null ? "" : text);
+    rules.forEach(r => { s = s.replace(r.re, r.to); });
+    return s;
+  }
+  return { clean, rules };
+})();
+const san = text => ProfanityFilter.clean(text);
+
+/* ---------- STATE ---------- */
+function freshState() {
+  return {
+    clues: [], combos: [], connections: [], usedTopics: [],
+    quizIndex: 0, chaptersSeen: [], motelSeen: false, ended: false,
+    // 순차 잠금: 첫 장소(해변)만 열려 있고, 단서를 다 모으면 다음 장소가 순서대로 열린다
+    unlocked: ["beach"]
+  };
+}
+// 장소 진행 순서
+const LOC_ORDER = ["beach", "lab", "harbor", "motel", "station"];
+let state = freshState();
+let screen = "title";
+let storyQueue = [];
+let storyCb = null;
+let currentChapter = null;
+let boardMode = "link";
+let boardSelected = [];
+let pendingCombine = [];
+let currentSuspect = null;
+let currentLoc = null;
+let toastTimer = null;
+
+function showScreen(name) {
+  $$(".screen").forEach(s => s.classList.remove("active"));
+  const el = $("#screen-" + name);
+  if (el) el.classList.add("active");
+  screen = name;
+  updateSignal();
+  window.scrollTo(0, 0);
+}
+
+function toast(msg) {
+  const t = $("#toast");
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+function save() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {}
+  updateContinue();
+  updateSignal();
+}
+
+function updateSignal() {
+  const pct = Math.min(100, Math.round(
+    (state.clues.length / Object.keys(CLUES).length) * 60 +
+    (state.combos.length / COMBINATIONS.length) * 40
+  ));
+  const fill = $("#signal-fill"), label = $("#signal-pct");
+  if (fill) fill.style.width = pct + "%";
+  if (label) label.textContent = pct + "%";
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    state = Object.assign(freshState(), JSON.parse(raw));
+    return true;
+  } catch (e) { return false; }
+}
+function updateContinue() {
+  const btn = $('[data-action="continue"]');
+  if (btn) btn.disabled = !localStorage.getItem(SAVE_KEY);
+}
+
+function playChapter(id, cb) {
+  const ch = CHAPTERS[id];
+  if (!ch) { if (cb) cb(); return; }
+  currentChapter = id;
+  if (!state.chaptersSeen.includes(id)) state.chaptersSeen.push(id);
+  storyQueue = ch.lines.slice();
+  storyCb = cb || null;
+  $("#story-chapter").textContent = ch.label;
+  $("#story-bg").className = "story-bg s" + (Object.keys(CHAPTERS).indexOf(id) % 3 + 1);
+  AudioSys.setMood(ch.bgm);
+  showScreen("story");
+  nextStoryLine();
+  save();
+}
+
+function nextStoryLine() {
+  const box = $("#story-text");
+  if (!box) return;
+  if (storyQueue.length === 0) {
+    if (storyCb) { const f = storyCb; storyCb = null; f(); }
+    else { renderMap(); showScreen("map"); }
+    return;
+  }
+  const line = storyQueue.shift();
+  $("#story-step").textContent = `${Math.max(0, CHAPTERS[currentChapter].lines.length - storyQueue.length)} / ${CHAPTERS[currentChapter].lines.length}`;
+  const div = document.createElement("div");
+  div.className = "story-line " + (line.type || "other");
+  div.innerHTML = `<span class="who">${esc(line.who)}</span><span class="text">${esc(line.text)}</span>`;
+  box.appendChild(div);
+  if (box.children.length > 5) box.removeChild(box.firstChild);
+  box.scrollTop = box.scrollHeight;
+  AudioSys.sfx("click");
+}
+
+function esc(s) {
+  return san(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+function renderMap() {
+  const wrap = $("#map-locations");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  Object.values(LOCATIONS).forEach(loc => {
+    const found = loc.clueIds.filter(id => state.clues.includes(id)).length;
+    const locked = !state.unlocked.includes(loc.id);
+    const pin = document.createElement("div");
+    pin.className = "loc-pin" + (found === loc.clueIds.length ? " done" : "") + (locked ? " locked" : "");
+    pin.style.left = loc.x + "%";
+    pin.style.top = loc.y + "%";
+    pin.innerHTML = `<div class="icon">${loc.icon}</div><div class="label">${san(loc.name)}</div>` +
+      (locked ? `<div class="lock">🔒</div>` :
+        (found > 0 && found < loc.clueIds.length ? `<div class="found">${found}</div>` : ""));
+    if (locked) pin.onclick = () => toast("아직 이 장소는 수사가 불가능합니다. 먼저 열린 장소의 단서를 모두 모으세요.");
+    else pin.onclick = () => openLocation(loc.id);
+    wrap.appendChild(pin);
+  });
+  $("#map-progress").textContent = `단서 ${state.clues.length} / ${Object.keys(CLUES).length}`;
+}
+
+function checkUnlock() {
+  // 현재 열린 마지막 장소의 단서를 다 모았으면 다음 장소를 해금
+  for (let i = 0; i < LOC_ORDER.length - 1; i++) {
+    const cur = LOC_ORDER[i];
+    const next = LOC_ORDER[i + 1];
+    if (state.unlocked.includes(cur) && !state.unlocked.includes(next)) {
+      const loc = LOCATIONS[cur];
+      const allFound = loc.clueIds.every(id => state.clues.includes(id));
+      if (allFound) {
+        state.unlocked.push(next);
+        save();
+        toast("새 수사 장소가 열렸습니다: " + LOCATIONS[next].name);
+      }
+    }
+  }
+}
+
+function showCaseFile(html) {
+  const body = $("#case-file .case-file-body");
+  if (body) body.innerHTML = html;
+}
+
+function openLocation(id) {
+  currentLoc = id;
+  const loc = LOCATIONS[id];
+  $("#loc-name").textContent = loc.name;
+  $("#loc-desc").textContent = loc.desc;
+  $("#loc-atmosphere").style.background =
+    `radial-gradient(circle at 50% 0%, ${id === "motel" ? "#3a1c24" : id === "beach" ? "#123a4a" : "#1b3045"}, transparent 60%)`;
+  renderClues();
+  showScreen("location");
+  AudioSys.setMood(id === "motel" ? "motel" : id === "harbor" ? "tense" : "investigate");
+  if (id === "motel" && !state.motelSeen) {
+    state.motelSeen = true;
+    save();
+    setTimeout(() => playChapter("act2", () => openLocation("motel")), 250);
+  }
+}
+
+function renderClues() {
+  const loc = LOCATIONS[currentLoc];
+  const list = $("#clue-list");
+  if (!list) return;
+  list.innerHTML = "";
+  $("#loc-count").textContent = `${loc.clueIds.filter(i => state.clues.includes(i)).length} / ${loc.clueIds.length}`;
+  loc.clueIds.forEach(id => {
+    const c = CLUES[id];
+    const found = state.clues.includes(id);
+    const card = document.createElement("div");
+    card.className = "clue-card" + (found ? " found" : "");
+    card.innerHTML = `<span class="clue-tag">${san(c.tag)}</span><div class="clue-icon">${c.icon}</div>
+      <div class="clue-title">${san(c.title)}</div><div class="clue-desc">${san(c.desc)}</div>`;
+    if (!found) card.onclick = () => collectClue(id);
+    list.appendChild(card);
+  });
+}
+
+function collectClue(id) {
+  if (state.clues.includes(id)) return;
+  state.clues.push(id);
+  AudioSys.sfx("collect");
+  toast("단서 수집: " + CLUES[id].title);
+  checkUnlock();
+  save();
+  renderClues();
+  showCaseFile(`<b>${san(CLUES[id].title)}</b><br>${san(CLUES[id].desc)}`);
+}
+
+function ownedItems() {
+  const arr = [];
+  state.clues.forEach(id => { if (CLUES[id]) arr.push(CLUES[id]); });
+  state.combos.forEach(id => {
+    const c = COMBINATIONS.find(x => x.id === id);
+    if (c) arr.push({ id: c.id, title: c.title, icon: c.icon, desc: c.desc, tag: "결론" });
+  });
+  return arr;
+}
+
+function openBoard() {
+  boardSelected = [];
+  pendingCombine = [];
+  renderBoard();
+  showScreen("board");
+  AudioSys.setMood("investigate");
+  $("#combine-result").textContent = "";
+  $("#combine-btn").style.display = "none";
+  setBoardMode("link");
+}
+
+function setBoardMode(mode) {
+  boardMode = mode;
+  boardSelected = [];
+  pendingCombine = [];
+  $$("[data-action^='board-mode']").forEach(b => b.classList.remove("active"));
+  const mb = $(`[data-action="board-mode-${mode}"]`);
+  if (mb) mb.classList.add("active");
+  $("#board-status").textContent = mode === "link"
+    ? "연결 모드: 카드 두 개를 클릭해 관계를 연결하세요."
+    : "조합 모드: 카드 두 개를 선택한 뒤 [조합 실행]을 누르세요.";
+  $("#combine-btn").style.display = mode === "combine" ? "inline-block" : "none";
+  $("#combine-result").textContent = "";
+  renderBoard();
+}
+
+function renderBoard() {
+  const wrap = $("#board-cards");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  ownedItems().forEach(item => {
+    const card = document.createElement("div");
+    const isConclusion = item.tag === "결론";
+    card.className = "board-card" + (isConclusion ? " conclusion" : "") +
+      (boardSelected.includes(item.id) ? " selected" : "");
+    card.dataset.id = item.id;
+    card.innerHTML = `<span class="bc-tag">${item.tag}</span><div class="bc-icon">${item.icon}</div>
+      <div class="bc-title">${san(item.title)}</div>`;
+    card.title = san(item.desc);
+    card.onclick = () => onBoardCard(item.id);
+    wrap.appendChild(card);
+  });
+  $("#board-count").textContent = `단서 ${state.clues.length} · 결론 ${state.combos.length}`;
+  requestAnimationFrame(drawLines);
+}
+
+function onBoardCard(id) {
+  AudioSys.sfx("click");
+  if (boardMode === "link") {
+    if (boardSelected.includes(id)) { boardSelected = []; renderBoard(); return; }
+    boardSelected.push(id);
+    if (boardSelected.length === 2) {
+      const [a, b] = boardSelected;
+      boardSelected = [];
+      tryConnect(a, b);
+    } else renderBoard();
+  } else {
+    if (pendingCombine.includes(id)) { pendingCombine = []; renderBoard(); return; }
+    pendingCombine.push(id);
+    if (pendingCombine.length === 2) {
+      renderBoard();
+      $("#board-status").textContent = `선택: ${ALL_IDS[pendingCombine[0]].title} + ${ALL_IDS[pendingCombine[1]].title}`;
+    } else renderBoard();
+  }
+}
+
+function pairKey(a, b) { return [a, b].sort().join("|"); }
+
+function tryConnect(a, b) {
+  const valid = CONNECTIONS.some(c => pairKey(c.a, c.b) === pairKey(a, b));
+  if (!valid) {
+    AudioSys.sfx("wrong");
+    toast("이 두 단서는 직접 연결되지 않습니다.");
+    renderBoard();
+    return;
+  }
+  const key = pairKey(a, b);
+  if (state.connections.includes(key)) {
+    toast("이미 연결된 단서입니다.");
+    renderBoard();
+    return;
+  }
+  state.connections.push(key);
+  AudioSys.sfx("success");
+  toast("연결 완료: " + san(ALL_IDS[a].title) + " ↔ " + san(ALL_IDS[b].title));
+  save();
+  renderBoard();
+}
+
+function doCombine() {
+  if (pendingCombine.length !== 2) { toast("카드 두 개를 먼저 선택하세요."); return; }
+  const [a, b] = pendingCombine;
+  const combo = COMBINATIONS.find(c => pairKey(c.a, c.b) === pairKey(a, b));
+  if (!combo) {
+    AudioSys.sfx("wrong");
+    $("#combine-result").textContent = "✕ 이 조합에서는 새로운 결론이 나오지 않았습니다.";
+    return;
+  }
+  if (state.combos.includes(combo.id)) {
+    $("#combine-result").textContent = "이미 발견한 결론입니다.";
+    return;
+  }
+  state.combos.push(combo.id);
+  AudioSys.sfx("reveal");
+  $("#combine-result").textContent = "✔ 새로운 결론: " + san(combo.title) + " — " + san(combo.desc);
+  $("#board-status").textContent = san(combo.desc);
+  pendingCombine = [];
+  save();
+  renderBoard();
+  if (combo.id === "e_drug") {
+    setTimeout(() => playChapter("act3", () => openBoard()), 900);
+  } else if (combo.id === "e_confess") {
+    toast("모든 증거가 모였습니다. 최종 추리가 가능합니다.");
+    setTimeout(() => playChapter("act5", () => openBoard()), 900);
+  }
+}
+
+function drawLines() {
+  const svg = $("#board-lines");
+  if (!svg) return;
+  const canvas = $("#board-canvas");
+  if (!canvas) return;
+  const cRect = canvas.getBoundingClientRect();
+  svg.setAttribute("viewBox", `0 0 ${canvas.scrollWidth} ${canvas.scrollHeight}`);
+  let html = `<defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e63946"/><stop offset="100%" stop-color="#4cc9f0"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>`;
+  state.connections.forEach(key => {
+    const [a, b] = key.split("|");
+    const ea = $(`.board-card[data-id="${a}"]`);
+    const eb = $(`.board-card[data-id="${b}"]`);
+    if (!ea || !eb) return;
+    const ra = ea.getBoundingClientRect(), rb = eb.getBoundingClientRect();
+    const x1 = ra.left - cRect.left + canvas.scrollLeft + ra.width / 2;
+    const y1 = ra.top - cRect.top + canvas.scrollTop + ra.height / 2;
+    const x2 = rb.left - cRect.left + canvas.scrollLeft + rb.width / 2;
+    const y2 = rb.top - cRect.top + canvas.scrollTop + rb.height / 2;
+    html += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="url(#lg)" stroke-width="2" opacity="0.8" filter="url(#glow)"/>`;
+  });
+  svg.innerHTML = html;
+}
+window.addEventListener("resize", () => { if (screen === "board") drawLines(); });
+
+function openInterrogate() {
+  renderSuspects();
+  if (!currentSuspect) selectSuspect("park");
+  showScreen("interrogate");
+  AudioSys.setMood("interrogate");
+}
+
+function renderSuspects() {
+  const wrap = $("#suspect-list");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  Object.values(SUSPECTS).forEach(s => {
+    const el = document.createElement("div");
+    el.className = "suspect" + (currentSuspect === s.id ? " active" : "");
+    const done = s.reactions.topics.filter(t => state.usedTopics.includes(s.id + "|" + t.need)).length;
+    el.innerHTML = `<div class="sicon">${s.icon}</div><div><div class="sname">${san(s.name)}</div>
+      <div class="srole">${san(s.role)}</div><div class="srole" style="color:${done === s.reactions.topics.length ? '#52d99a' : '#7b8fa6'}">${done}/${s.reactions.topics.length} 진술</div></div>`;
+    el.onclick = () => selectSuspect(s.id);
+    wrap.appendChild(el);
+  });
+}
+
+function selectSuspect(id) {
+  currentSuspect = id;
+  const s = SUSPECTS[id];
+  setDialog(s.name, s.intro);
+  $("#interrogate-log").innerHTML = "";
+  renderPresentEvidence();
+  renderSuspects();
+  AudioSys.sfx("click");
+}
+
+function setDialog(name, text) {
+  const box = $("#interrogate-dialog");
+  if (!box) return;
+  box.innerHTML = `<div class="dialog-name">${esc(name)}</div><div class="dialog-text">${esc(text)}</div>`;
+}
+
+function renderPresentEvidence() {
+  const wrap = $("#present-evidence");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  ownedItems().forEach(item => {
+    const used = state.usedTopics.includes(currentSuspect + "|" + item.id);
+    const chip = document.createElement("div");
+    chip.className = "ev-chip" + (used ? " used" : "");
+    chip.textContent = item.icon + " " + san(item.title);
+    chip.onclick = () => presentEvidence(item.id, item.title);
+    wrap.appendChild(chip);
+  });
+}
+
+function presentEvidence(id, title) {
+  if (!currentSuspect) return;
+  const s = SUSPECTS[currentSuspect];
+  const key = currentSuspect + "|" + id;
+  if (state.usedTopics.includes(key)) { toast("이미 제시한 증거입니다."); return; }
+  if (currentSuspect === "ryu" && !state.combos.includes("e_confess")) {
+    AudioSys.sfx("wrong");
+    setDialog(s.name + " · 여유롭게", s.reactions.locked);
+    addLog(title, "증거가 부족해 진술을 끌어내지 못했다.");
+    return;
+  }
+  const topic = s.reactions.topics.find(t => t.need === id);
+  if (!topic) {
+    AudioSys.sfx("wrong");
+    setDialog(s.name, s.reactions.wrong);
+    addTarinLine(TARIN_QUIPS[Math.floor(Math.random() * TARIN_QUIPS.length)]);
+    addLog(title, "통하지 않았다: " + s.reactions.wrong);
+    return;
+  }
+  state.usedTopics.push(key);
+  AudioSys.sfx(topic.final ? "reveal" : "success");
+  setDialog(s.name + (topic.shake ? " · 당황" : ""), topic.say);
+  if (!topic.final) addTarinLine(["거봐. 그럼 다음 건 어때?", "그래, 그렇게 말하게 만드는 게 증거지.", "계속해. 방향은 맞아."][Math.floor(Math.random() * 3)]);
+  addLog(title, topic.say);
+  if (topic.final) state.ryuConfessed = true;
+  save();
+  renderPresentEvidence();
+  renderSuspects();
+}
+
+function addTarinLine(text) {
+  const log = $("#interrogate-log");
+  if (!log) return;
+  const d = document.createElement("div");
+  d.className = "log-line tarin-line";
+  d.innerHTML = `<b>한태린</b> — ${esc(text)}`;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+
+function addLog(evidence, text) {
+  const log = $("#interrogate-log");
+  if (!log) return;
+  const d = document.createElement("div");
+  d.className = "log-line";
+  d.innerHTML = `<b>[증거 제시] ${esc(evidence)}</b><br>${esc(text)}`;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+
+function openQuiz() {
+  if (!state.combos.includes("e_confess")) {
+    toast("아직 추리할 증거가 부족합니다. 증거 보드에서 결론을 완성하세요.");
+    return;
+  }
+  state.quizIndex = Math.min(state.quizIndex, QUIZ.length - 1);
+  renderQuiz();
+  showScreen("quiz");
+  AudioSys.setMood("reveal");
+}
+
+function renderQuiz() {
+  const area = $("#quiz-area");
+  if (!area) return;
+  const q = QUIZ[state.quizIndex];
+  const has = state.clues.includes(q.need) || state.combos.includes(q.need);
+  $("#quiz-progress").textContent = `${state.quizIndex + 1} / ${QUIZ.length}`;
+  if (!has) {
+    area.innerHTML = `<div class="quiz-card"><div class="quiz-need">⚠ 필요 증거 미확보</div>
+      <div class="quiz-q">${esc(q.q)}</div>
+      <div class="quiz-fb no">이 질문에 답하려면 먼저 증거를 확보해야 합니다: ${san(ALL_IDS[q.need] ? ALL_IDS[q.need].title : q.need)}</div>
+      <button class="btn small" data-action="go-board" style="margin-top:16px">증거 보드로</button></div>`;
+    return;
+  }
+  area.innerHTML = `<div class="quiz-card">
+    <div class="quiz-need">CASE QUESTION ${state.quizIndex + 1}</div>
+    <div class="quiz-q">${esc(q.q)}</div>
+    <div class="quiz-options">${q.options.map((o, i) =>
+      `<button class="quiz-opt" data-i="${i}">${String.fromCharCode(65 + i)}. ${esc(o.text)}</button>`).join("")}</div>
+    <div class="quiz-fb" id="quiz-fb"></div>
+    <button class="btn primary" id="quiz-next" style="display:none;margin-top:16px">다음 질문 ▶</button>
+  </div>`;
+  $$(".quiz-opt").forEach(btn => btn.onclick = () => answerQuiz(q, parseInt(btn.dataset.i)));
+}
+
+function answerQuiz(q, i) {
+  const opt = q.options[i];
+  const fb = $("#quiz-fb");
+  $$(".quiz-opt").forEach(b => b.classList.remove("correct", "wrong"));
+  const clicked = $(`.quiz-opt[data-i="${i}"]`);
+  if (clicked) clicked.classList.add(opt.correct ? "correct" : "wrong");
+  fb.className = "quiz-fb " + (opt.correct ? "ok" : "no");
+  fb.textContent = opt.fb;
+  if (opt.correct) {
+    AudioSys.sfx("success");
+    const next = $("#quiz-next");
+    next.style.display = "inline-block";
+    next.onclick = () => {
+      if (state.quizIndex < QUIZ.length - 1) {
+        state.quizIndex++;
+        save();
+        renderQuiz();
+      } else {
+        finishGame();
+      }
+    };
+  } else AudioSys.sfx("wrong");
+}
+
+function finishGame() {
+  state.ended = true;
+  save();
+  AudioSys.sfx("reveal");
+  playChapter("ending", () => {
+    $("#ending-text").innerHTML = CHAPTERS.ending.lines
+      .map(l => `<p class="${l.type === "sys" ? "sys" : ""}"><b style="color:${l.type === "tarin" ? "#e63946" : "#4cc9f0"}">${esc(l.who)}</b> — ${esc(l.text)}</p>`).join("");
+    showScreen("ending");
+    AudioSys.setMood("ending");
+  });
+}
+
+let exitKeptSave = false;
+function doExit(keepSave) {
+  exitKeptSave = keepSave;
+  if (keepSave) save();
+  else { localStorage.removeItem(SAVE_KEY); state = freshState(); updateContinue(); updateSignal(); }
+  $("#modal-exit").classList.remove("open");
+  $("#exit-msg").textContent = keepSave
+    ? "진행 상황이 저장되었습니다. 타이틀의 [이어서 수사]로 돌아올 수 있습니다."
+    : "저장하지 않고 나갔습니다. 처음부터 다시 수사하게 됩니다.";
+  AudioSys.stop();
+  showScreen("exit");
+  AudioSys.setMood("title");
+}
+
+function openDossier() {
+  const revealed = state.ended || state.combos.includes("e_culprit");
+  $("#dossier-content").innerHTML = DOSSIER.map(d => {
+    const tag = revealed && d.hiddenTag ? d.hiddenTag : d.tag;
+    const rows = revealed && d.hiddenRows ? d.rows.concat(d.hiddenRows) : d.rows;
+    return `<div class="dossier">
+      <div class="dossier-head">
+        <span class="dicon">${d.icon}</span>
+        <span class="dname" style="color:${d.color}">${san(d.name)}</span>
+        <span class="dtag">${san(tag)}</span>
+      </div>
+      ${rows.map(r => `<div class="dossier-row"><span class="dk">${san(r[0])}</span><span class="dv">${san(r[1])}</span></div>`).join("")}
+    </div>`;
+  }).join("");
+  $("#modal-dossier").classList.add("open");
+}
+
+function newGame() {
+  state = freshState();
+  currentSuspect = null;
+  currentLoc = null;
+  storyQueue = [];
+  AudioSys.ensure();
+  playChapter("prologue", () => playChapter("act1", () => {
+    renderMap();
+    showScreen("map");
+    showCaseFile("<p><b>CASE #DS-0617</b><br>6개월간 6명 사망. 전원 탈수로 판명됐다. 한태건 경감은 이 사건을 조사하던 중 폐모텔에서 살해됐다.</p><p>현재 열린 장소의 단서를 모두 모으면 다음 장소가 열립니다.</p>");
+  }));
+}
+
+function continueGame() {
+  if (!load()) { toast("저장된 수사가 없습니다."); return; }
+  AudioSys.ensure();
+  if (state.ended) {
+    $("#ending-text").innerHTML = CHAPTERS.ending.lines
+      .map(l => `<p class="${l.type === "sys" ? "sys" : ""}"><b style="color:${l.type === "tarin" ? "#e63946" : "#4cc9f0"}">${esc(l.who)}</b> — ${esc(l.text)}</p>`).join("");
+    showScreen("ending");
+    AudioSys.setMood("ending");
+    return;
+  }
+  renderMap();
+  showScreen("map");
+  AudioSys.setMood("investigate");
+}
+
+/* ---------- EVENT WIRING ---------- */
+document.addEventListener("click", e => {
+  const btn = e.target.closest("[data-action]");
+  if (!btn) return;
+  const a = btn.dataset.action;
+  AudioSys.ensure();
+  if (a !== "sound-toggle") AudioSys.sfx("click");
+  switch (a) {
+    case "new-game": newGame(); break;
+    case "continue": continueGame(); break;
+    case "howto": $("#modal-howto").classList.add("open"); break;
+    case "close-howto": $("#modal-howto").classList.remove("open"); break;
+    case "open-dossier": openDossier(); break;
+    case "close-dossier": $("#modal-dossier").classList.remove("open"); break;
+    case "open-exit": $("#modal-exit").classList.add("open"); break;
+    case "exit-cancel": $("#modal-exit").classList.remove("open"); break;
+    case "exit-save": doExit(true); break;
+    case "exit-nosave": doExit(false); break;
+    case "exit-to-title": showScreen("title"); updateContinue(); AudioSys.setMood("title"); break;
+    case "close-window": window.close(); toast("탭을 직접 닫아주세요."); break;
+    case "story-next": nextStoryLine(); break;
+    case "go-map": renderMap(); showScreen("map"); break;
+    case "go-board": openBoard(); break;
+    case "go-interrogate": openInterrogate(); break;
+    case "go-quiz": openQuiz(); break;
+    case "board-mode-link": setBoardMode("link"); break;
+    case "board-mode-combine": setBoardMode("combine"); break;
+    case "do-combine": doCombine(); break;
+    case "to-title": showScreen("title"); updateContinue(); AudioSys.setMood("title"); break;
+  }
+});
+
+const soundBtn = $("#sound-toggle");
+if (soundBtn) {
+  soundBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    AudioSys.ensure();
+    const m = AudioSys.toggleMute();
+    e.currentTarget.textContent = m ? "🔇" : "🔊";
+  });
+}
+
+document.addEventListener("keydown", e => {
+  const modalOpen = ["modal-exit", "modal-howto", "modal-dossier"].some(id => $("#" + id) && $("#" + id).classList.contains("open"));
+  if (modalOpen) return;
+  if (screen === "story" && (e.code === "Space" || e.code === "Enter")) {
+    e.preventDefault(); nextStoryLine();
+  }
+});
+
+/* ---------- INIT ---------- */
+const boardCanvas = $("#board-canvas");
+if (boardCanvas) boardCanvas.addEventListener("scroll", () => drawLines());
+
+updateContinue();
+showScreen("title");
+AudioSys.setMood("title");
 </script>
 </body>
 </html>
